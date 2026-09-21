@@ -1,5 +1,7 @@
+using System.Threading.RateLimiting;
 using GuardProxy.Configuration;
 using GuardProxy.Proxy;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +33,24 @@ builder.WebHost.UseUrls(guardProxyConfig.Listen.Url);
 var (routes, clusters) = ProxyRouteConfigFactory.Create(guardProxyConfig.Upstream);
 builder.Services.AddReverseProxy().LoadFromMemory(routes, clusters);
 
+const string ConcurrencyLimiterPolicy = "upstream-concurrency";
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status503ServiceUnavailable;
+
+    options.AddConcurrencyLimiter(ConcurrencyLimiterPolicy, limiterOptions =>
+    {
+        limiterOptions.PermitLimit = guardProxyConfig.Proxy.MaxConcurrentRequests;
+        limiterOptions.QueueLimit = 0;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
+
 var app = builder.Build();
 
-app.MapReverseProxy();
+app.UseRateLimiter();
+
+app.MapReverseProxy().RequireRateLimiting(ConcurrencyLimiterPolicy);
 
 app.Run();
