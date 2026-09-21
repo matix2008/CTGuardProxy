@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GuardProxy/GuardProxy.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GuardProxy.IntegrationTests/GuardProxy.IntegrationTests.csproj" />
+    <Project Path="tests/GuardProxy.UnitTests/GuardProxy.UnitTests.csproj" />
+  </Folder>
+</Solution>

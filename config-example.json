@@ -1,0 +1,33 @@
+{
+  "listen": {
+    "url": "http://127.0.0.1:8081"
+  },
+  "upstream": {
+    "url": "http://service.example.local:8080/service"
+  },
+  "proxy": {
+    "maxConcurrentRequests": 8,
+    "requestTimeoutMs": 15000,
+    "retryCount": 0
+  },
+  "healthCheck": {
+    "enabled": true,
+    "method": "POST",
+    "url": "http://service.example.local:8080/service/healthcheck",
+    "intervalMs": 5000,
+    "timeoutMs": 2000,
+    "failureThreshold": 2,
+    "responseValidation": {
+      "type": "jsonFieldEquals",
+      "field": "reply",
+      "expectedValue": "I'm alive",
+      "comparison": "ordinal"
+    }
+  },
+  "logging": {
+    "directory": "logs",
+    "level": "Information",
+    "maxFileSizeMb": 10,
+    "maxFiles": 10
+  }
+}
